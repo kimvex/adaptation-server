@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 // Execute Installation for server
@@ -34,7 +33,7 @@ func InstallServices() {
 					fmt.Fprintln(os.Stderr, errAdd)
 				}
 
-				errEcho := runCommands("echo \"deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse\" | sudo tee /etc/apt/sources.list.d/mongodb.list")
+				errEcho := runCommands("echo 'deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse' | sudo tee /etc/apt/sources.list.d/mongodb.list")
 
 				if errEcho != nil {
 					fmt.Fprintln(os.Stderr, errEcho)
@@ -46,7 +45,7 @@ func InstallServices() {
 					fmt.Fprintln(os.Stderr, errUpdateApt)
 				}
 
-				errInstallMongo := runCommands("sudo apt install mongodb-org")
+				errInstallMongo := runCommands("sudo apt -y install mongodb-org")
 
 				if errInstallMongo != nil {
 					fmt.Fprintln(os.Stderr, errInstallMongo)
@@ -72,7 +71,7 @@ func InstallServices() {
 					fmt.Fprintln(os.Stderr, errUpdateApt)
 				}
 
-				errInstallMysql := runCommands("sudo apt-get install mysql-server")
+				errInstallMysql := runCommands("sudo apt-get -y install mysql-server")
 
 				if errInstallMysql != nil {
 					fmt.Fprintln(os.Stderr, errInstallMysql)
@@ -86,10 +85,16 @@ func InstallServices() {
 					fmt.Fprintln(os.Stderr, errAptConfig)
 				}
 
-				errKeyCrystal := runCommands("curl -sL \"https://keybase.io/crystal/pgp_keys.asc\" | sudo apt-key add - echo \"deb https://dist.crystal-lang.org/apt crystal main\" | sudo tee /etc/apt/sources.list.d/crystal.list")
+				errCulrF := runCommands("curl -sL https://keybase.io/crystal/pgp_keys.asc | sudo apt-key add -")
 
-				if errKeyCrystal != nil {
-					fmt.Fprintln(os.Stderr, errKeyCrystal)
+				if errCulrF != nil {
+					fmt.Fprintln(os.Stderr, errCulrF)
+				}
+
+				errEcho := runCommands("echo 'deb https://dist.crystal-lang.org/apt crystal main' | sudo tee /etc/apt/sources.list.d/crystal.list")
+
+				if errEcho != nil {
+					fmt.Fprintln(os.Stderr, errEcho)
 				}
 
 				errUpdateApt := runCommands("sudo apt-get update")
@@ -98,43 +103,43 @@ func InstallServices() {
 					fmt.Fprintln(os.Stderr, errUpdateApt)
 				}
 
-				errInstallCrystal := runCommands("sudo apt install crystal")
+				errInstallCrystal := runCommands("sudo apt -y install crystal")
 
 				if errInstallCrystal != nil {
 					fmt.Fprintln(os.Stderr, errInstallCrystal)
 				}
 
-				errInstallLibSsl := runCommands("sudo apt install libssl-dev")
+				errInstallLibSsl := runCommands("sudo apt -y install libssl-dev")
 
 				if errInstallLibSsl != nil {
 					fmt.Fprintln(os.Stderr, errInstallLibSsl)
 				}
 
-				errinstallLibXML := runCommands("sudo apt install libxml2-dev")
+				errinstallLibXML := runCommands("sudo apt -y install libxml2-dev")
 
 				if errinstallLibXML != nil {
 					fmt.Fprintln(os.Stderr, errinstallLibXML)
 				}
 
-				errInstallLibYaml := runCommands("sudo apt install libyaml-dev")
+				errInstallLibYaml := runCommands("sudo apt -y install libyaml-dev")
 
 				if errInstallLibYaml != nil {
 					fmt.Fprintln(os.Stderr, errInstallLibYaml)
 				}
 
-				errInstallLibGmp := runCommands("sudo apt install libgmp-dev")
+				errInstallLibGmp := runCommands("sudo apt -y install libgmp-dev")
 
 				if errInstallLibGmp != nil {
 					fmt.Fprintln(os.Stderr, errInstallLibGmp)
 				}
 
-				errInstallLibReadline := runCommands("sudo apt install libreadline-dev")
+				errInstallLibReadline := runCommands("sudo apt -y install libreadline-dev")
 
 				if errInstallLibReadline != nil {
 					fmt.Fprintln(os.Stderr, errInstallLibReadline)
 				}
 
-				errInstallLibZ := runCommands("sudo apt install libz-dev")
+				errInstallLibZ := runCommands("sudo apt -y install libz-dev")
 
 				if errInstallLibZ != nil {
 					fmt.Fprintln(os.Stderr, errInstallLibZ)
@@ -143,26 +148,26 @@ func InstallServices() {
 			}
 		case "driverMongo":
 			if v == true {
-				errUpdateApt := runCommands("sudo apt-get update")
+				errUpdateApt := runCommands("sudo apt-get -y update")
 
 				if errUpdateApt != nil {
 					fmt.Fprintln(os.Stderr, errUpdateApt)
 				}
 
-				errInstallDriverMongoC := runCommands("sudo apt install libmongoc-dev libmongoc-1.0-0 libmongoclient-dev")
+				errInstallDriverMongoC := runCommands("sudo apt -y install libmongoc-dev libmongoc-1.0-0 libmongoclient-dev")
 
 				if errInstallDriverMongoC != nil {
 					fmt.Fprintln(os.Stderr, errInstallDriverMongoC)
 				}
 			}
 		case "redis":
-			errUpdateApt := runCommands("sudo apt-get update")
+			errUpdateApt := runCommands("sudo apt-get -y update")
 
 			if errUpdateApt != nil {
 				fmt.Fprintln(os.Stderr, errUpdateApt)
 			}
 
-			errInstallRedis := runCommands("sudo apt-get install redis-server")
+			errInstallRedis := runCommands("sudo apt-get -y install redis-server")
 
 			if errInstallRedis != nil {
 				fmt.Fprintln(os.Stderr, errInstallRedis)
@@ -187,16 +192,21 @@ func InstallServices() {
 }
 
 func runCommands(command string) error {
-	command = strings.TrimSuffix(command, "\n")
-	arrCommandStr := strings.Fields(command)
+	// command = strings.TrimSuffix(command, "")
+	// arrCommandStr := strings.Fields(command)
 
-	switch arrCommandStr[0] {
-	case "exit":
-		os.Exit(0)
-		// add another case here for custom commands.
-	}
+	// fmt.Println("<<<<<Init>>>>>>")
+	// fmt.Println(command)
+	// fmt.Println(arrCommandStr)
+	// fmt.Println("<<<<<End>>>>>>")
 
-	cmd := exec.Command(arrCommandStr[0], arrCommandStr[1:]...)
+	// switch arrCommandStr[0] {
+	// case "exit":
+	// 	os.Exit(0)
+	// 	// add another case here for custom commands.
+	// }
+
+	cmd := exec.Command("/bin/bash", "-c", command)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	return cmd.Run()

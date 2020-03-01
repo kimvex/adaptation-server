@@ -4,5 +4,5 @@
   "crystalLang": true,
   "driverMongo": true,
   "redis": true,
-  "gitclone": "git@github.com:kimvex/kimvex-app.git"
+  "gitclone": "git@github.com:kimvex/kimvex-api.git"
 }
